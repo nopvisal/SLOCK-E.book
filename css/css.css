@@ -1,0 +1,393 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-image: url(Background.webp);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            width: 100%;
+            min-height: 70px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: transparent;
+            color: white;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+        .left-tools,
+        .right-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .page-indicator {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            letter-spacing: 0.3px;
+            min-width: 85px;
+            text-align: center;
+            transition: all 0.25s ease;
+        }
+        .control-btn {
+            border: none;
+            outline: none;
+            height: 42px;
+            min-width: 42px;
+            padding: 0 18px;
+            border-radius: 30px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(4px);
+            color: #f1f5f9;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            letter-spacing: 0.2px;
+        }
+        .control-btn:hover {
+            background: #334155;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+        .control-btn:active {
+            transform: scale(0.96);
+            background: #1e293b;
+        }
+        @media (max-width: 680px) {
+            .topbar {
+                padding: 10px 14px;
+                gap: 8px;
+                min-height: 58px;
+            }
+            .left-tools,
+            .right-tools {
+                gap: 6px;
+            }
+            .brand {
+                font-size: 1rem;
+            }
+            .control-btn {
+                height: 36px;
+                min-width: 36px;
+                padding: 0 11px;
+                font-size: 0.75rem;
+            }
+            .page-indicator {
+                padding: 4px 10px;
+                font-size: 0.72rem;
+                min-width: 65px;
+            }
+        }
+
+        .book-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            touch-action: none;
+        }
+
+        .zoom-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            will-change: transform;
+            transform-origin: center center;
+            transition: transform 0.08s ease-out;
+        }
+        .zoom-container.animating {
+            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* ── 3D Book with creased shadows ── */
+        #flipbook {
+            position: relative;
+            cursor: grab;
+            box-shadow:
+                0 3px 6px rgba(0, 0, 0, 0.55),
+                0 12px 28px rgba(0, 0, 0, 0.42),
+                0 30px 70px rgba(0, 0, 0, 0.35),
+                10px 22px 48px rgba(0, 0, 0, 0.3);
+            border-radius: 2px 6px 6px 2px;
+            transition: box-shadow 0.35s ease;
+        }
+        #flipbook:active {
+            cursor: grabbing;
+        }
+        #flipbook.turn-dragging {
+            cursor: grabbing;
+        }
+
+        #flipbook .page {
+            background: #111827;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #flipbook .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+            background: #111827;
+            transition: opacity 0.18s ease;
+        }
+        #flipbook .page img.lazy-load {
+            opacity: 0;
+        }
+        #flipbook .page img.loaded {
+            opacity: 1;
+        }
+        #flipbook .page .loading-placeholder {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(110deg, #1e293b 8%, #2d3a4f 18%, #1e293b 33%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite linear;
+            z-index: 1;
+            pointer-events: none;
+        }
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        /* Spine crease (left edge by default) */
+        #flipbook .page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 28px;
+            background: linear-gradient(to right,
+                    rgba(0, 0, 0, 0.32) 0%,
+                    rgba(0, 0, 0, 0.14) 25%,
+                    rgba(255, 255, 255, 0.03) 40%,
+                    transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.25s ease;
+        }
+
+        /* Double display adjustments */
+        #flipbook.display-double .even::after {
+            left: auto;
+            right: 0;
+            background: linear-gradient(to left,
+                    rgba(0, 0, 0, 0.32) 0%,
+                    rgba(0, 0, 0, 0.14) 25%,
+                    rgba(255, 255, 255, 0.03) 40%,
+                    transparent 100%);
+        }
+        #flipbook.display-double .odd::after {
+            left: 0;
+            right: auto;
+            background: linear-gradient(to right,
+                    rgba(0, 0, 0, 0.32) 0%,
+                    rgba(0, 0, 0, 0.14) 25%,
+                    rgba(255, 255, 255, 0.03) 40%,
+                    transparent 100%);
+        }
+
+        /* Outer free‑edge shadow */
+        #flipbook .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            background: linear-gradient(to left,
+                    rgba(0, 0, 0, 0.18) 0%,
+                    rgba(0, 0, 0, 0.04) 50%,
+                    transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.25s ease;
+        }
+        #flipbook.display-double .even::before {
+            left: 0;
+            right: auto;
+            background: linear-gradient(to right,
+                    rgba(0, 0, 0, 0.18) 0%,
+                    rgba(0, 0, 0, 0.04) 50%,
+                    transparent 100%);
+        }
+        #flipbook.display-double .odd::before {
+            left: auto;
+            right: 0;
+            background: linear-gradient(to left,
+                    rgba(0, 0, 0, 0.18) 0%,
+                    rgba(0, 0, 0, 0.04) 50%,
+                    transparent 100%);
+        }
+
+        .zoom-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #cbd5e6;
+            pointer-events: none;
+            z-index: 20;
+            letter-spacing: 0.3px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .zoom-hint.visible {
+            opacity: 1;
+        }
+
+        .torx-loader {
+            z-index: 100000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(Background.webp);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.35s ease;
+        }
+        .torx {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            animation: spin 1.2s linear infinite;
+        }
+        .torx svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+        }
+        .torx .path {
+            stroke: #38bdf8;
+            stroke-width: 3;
+            stroke-linecap: round;
+            fill: none;
+            stroke-dasharray: 240;
+            stroke-dashoffset: 0;
+            animation: dash 1.5s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes dash {
+            0% {
+                stroke-dashoffset: 240;
+            }
+            50% {
+                stroke-dashoffset: 80;
+            }
+            100% {
+                stroke-dashoffset: 240;
+            }
+        }
+        .loader-text {
+            margin-top: 24px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .loader-progress {
+            margin-top: 12px;
+            width: 200px;
+            height: 3px;
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .loader-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #38bdf8;
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+        @media (max-width: 768px) {
+            .torx {
+                width: 60px;
+                height: 60px;
+            }
+            .loader-text {
+                font-size: 0.75rem;
+            }
+            .loader-progress {
+                width: 160px;
+            }
+        }
